@@ -1,11 +1,11 @@
 // Components/FilmDetail.js
 
 import React from 'react'
-import {StyleSheet, View, Text, ActivityIndicator, ScrollView, Image, TouchableOpacity} from 'react-native'
+import {StyleSheet, View, Text, ActivityIndicator, ScrollView, Image, Button, TouchableOpacity} from 'react-native'
 import {getFilmDetailFromApi, getImageFromApi} from "../API/TMBDApi";
 import moment from "moment";
 import numeral from 'numeral';
-import { connect } from 'react-redux'
+import {connect} from 'react-redux'
 
 class FilmDetail extends React.Component {
 
@@ -25,6 +25,27 @@ class FilmDetail extends React.Component {
                 </View>
             )
         }
+    }
+
+    _toggleFavorite() {
+        const action = {type: "TOGGLE_FAVORITE", value: this.state.film}
+        this.props.dispatch(action)
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        console.log(this.props.favoritesFilm);
+    }
+
+    _displayFavoriteImage() {
+        var SourceImage = require('../Images/iic_favorite_border.png')
+        if (this.props.favoritesFilm.findIndex(item => item.id === this.state.film.id) !== -1) {
+            SourceImage = require('../Images/iic_favorite.png')
+        }
+        return (
+            <Image source={SourceImage}
+                   style={styles.favorite_image}
+            />
+        )
     }
 
     componentDidMount() {
@@ -47,6 +68,11 @@ class FilmDetail extends React.Component {
                         source={{uri: getImageFromApi(film.backdrop_path)}}
                     />
                     <Text style={styles.title}>{film.title}</Text>
+                    <TouchableOpacity
+                        style={styles.favorite_container}
+                        onPress={() => this._toggleFavorite()}>
+                        {this._displayFavoriteImage()}
+                    </TouchableOpacity>
                     <Text style={styles.overview}>{film.overview}</Text>
                     <Text style={styles.default_text}>Sorti
                         le {moment(new Date(film.release_date)).format('DD/MM/YYYY')}</Text>
@@ -108,10 +134,17 @@ const styles = StyleSheet.create({
         fontSize: 12,
         textAlign: 'center'
     },
-    default_text: {
+    default_text: {
         marginLeft: 5,
         marginRight: 5,
         marginTop: 5,
+    },
+    favorite_container: {
+        alignItems: 'center'
+    },
+    favorite_image: {
+        width: 40,
+        height: 40
     }
 })
 
